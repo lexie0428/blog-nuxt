@@ -13,13 +13,6 @@
   </div>
 </template>
 
-<script>
-import Intro from "@/components/UI/Intro.vue"
-export default {
-  components: { Intro }
-}
-</script>
-
 <style lang="scss" scoped>
 .about {
   text-align: center;
