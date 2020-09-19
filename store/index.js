@@ -2,6 +2,7 @@ import axios from "axios";
 
 export const state = () => ({
   postsLoaded: [],
+  commentsLoaded: []
 });
 
 export const mutations = {
@@ -15,11 +16,15 @@ export const mutations = {
   editPost(state, postEdit) {
     const postIndex = state.postsLoaded.findIndex(post => post.id === postEdit.id);
     state.postsLoaded[postIndex] = postEdit;
-  }
+  },
+  addComment(state, comment) {
+    console.log(comment);
+    state.commentsLoaded.push(comment);
+  },
 };
 
 export const actions = {
-  nuxtServerInit({ commit }, context) {
+  nuxtServerInit ({ commit }, context) {
     return axios
       .get("https://blog-nuxt-6f33e.firebaseio.com/posts.json")
       .then((res) => {
@@ -31,7 +36,7 @@ export const actions = {
       })
       .catch((e) => console.log(e));
   },
-  addPost({ commit }, post) {
+  addPost ({ commit }, post) {
     return axios
       .post("https://blog-nuxt-6f33e.firebaseio.com/posts.json", post)
       .then((res) => {
@@ -39,7 +44,7 @@ export const actions = {
       })
       .catch((e) => console.log(e));
   },
-  editPost({ commit }, post) {
+  editPost ({ commit }, post) {
     return axios
       .put(`https://blog-nuxt-6f33e.firebaseio.com/posts/${post.id}.json`, post)
       .then((res) => {
@@ -47,6 +52,14 @@ export const actions = {
       })
       .catch((e) => console.log(e));
   },
+  addComment ({commit}, comment) {
+    return axios
+      .post("https://blog-nuxt-6f33e.firebaseio.com/comments.json", comment)
+      .then((res) => {
+        commit("addComment", { ...comment, id: res.data.name });
+      })
+      .catch((e) => console.log(e));
+  }
 };
 
 export const getters = {

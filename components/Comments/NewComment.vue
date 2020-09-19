@@ -1,20 +1,20 @@
 <template>
   <section class="new-comment">
     <div class="container">
-      <h2 class="title"> New Comment: </h2>
+      <h2 class="title">New Comment:</h2>
 
-       <!-- message -->
-      <Message v-if="message" :message="message"/>
+      <!-- message -->
+      <Message v-if="message" :message="message" />
 
       <form @submit.prevent="onSubmit" class="contact-form">
         <!-- name -->
-        <AppInput v-model="comment.name"> Name: </AppInput>
+        <AppInput v-model="comment.name">Name:</AppInput>
         <!-- text -->
-        <AppTextArea v-model="comment.text"> Text: </AppTextArea>
+        <AppTextArea v-model="comment.text">Text:</AppTextArea>
 
         <!-- //buttons -->
         <div class="controls">
-          <AppButton> Submit! </AppButton>
+          <AppButton>Submit!</AppButton>
         </div>
       </form>
     </div>
@@ -22,27 +22,37 @@
 </template>
 
 <script>
-
 export default {
+  props: {
+    postId: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
       message: null,
       comment: {
-        name: '',
-        text: '',
-      } 
-    }
+        name: "",
+        text: ""
+      }
+    };
   },
   methods: {
     onSubmit() {
-      console.log(this.comment);
-      this.message = 'Submited!';
-      // Reset
-      this.comment.name = '';
-      this.comment.text = '';
+      this.$store
+        .dispatch("addComment", { postId: this.postId, publish: false, ...this.comment })
+        .then(() => {
+          console.log(this.comment);
+          this.message = "Submited!";
+          // Reset
+          this.comment.name = "";
+          this.comment.text = "";
+        })
+        .catch(e => console.log(e));
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
