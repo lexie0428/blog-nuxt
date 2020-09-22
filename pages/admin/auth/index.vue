@@ -3,7 +3,7 @@
     <div class="container">
       <form @submit.prevent="onSubmit" class="auth__form">
         <AppInput type="email" v-model="user.email">Login:</AppInput>
-        <AppInput type="password" v-model="user.password">Password:</AppInput>
+        <AppInput type="password" v-model="user.password" >Password:</AppInput>
 
         <div class="controls">
           <AppButton>Login!</AppButton>
@@ -25,9 +25,23 @@ export default {
   },
   methods: {
     onSubmit () {
-      //Reset
-      this.user.email = '';
-      this.user.password = '';
+      this.$store.dispatch('authUser', this.user)
+      .then((res) => {
+        console.log('!!!!');
+        console.log(res);
+        
+        
+        this.$router.push('/admin/');
+        //Reset
+        // this.user.email = '';
+        // this.user.password = '';
+      })
+      .catch((e) => {
+        console.log(e);
+        //Reset
+        this.user.email = '';
+        this.user.password = '';
+      })
     }
   }
 }

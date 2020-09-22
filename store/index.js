@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const state = () => ({
   postsLoaded: [],
-  commentsLoaded: []
+  token: null,
 });
 
 export const mutations = {
@@ -14,17 +14,21 @@ export const mutations = {
     console.log(post);
   },
   editPost(state, postEdit) {
-    const postIndex = state.postsLoaded.findIndex(post => post.id === postEdit.id);
+    const postIndex = state.postsLoaded.findIndex(
+      (post) => post.id === postEdit.id
+    );
     state.postsLoaded[postIndex] = postEdit;
   },
-  addComment(state, comment) {
-    console.log(comment);
-    state.commentsLoaded.push(comment);
+  setToken(state, token) {
+    state.token = token;
   },
+  destroyToken(state) {
+    state.token = null;
+  }
 };
 
 export const actions = {
-  nuxtServerInit ({ commit }, context) {
+  nuxtServerInit({ commit }, context) {
     return axios
       .get("https://blog-nuxt-6f33e.firebaseio.com/posts.json")
       .then((res) => {
@@ -36,7 +40,26 @@ export const actions = {
       })
       .catch((e) => console.log(e));
   },
-  addPost ({ commit }, post) {
+  authUser({ commit }, authData) {
+    const key = "AIzaSyD2-JeGhh2CM-154fExD1_oNTT4cL5j35Y";
+    return axios
+      .post(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${key}`,
+        {
+          email: authData.email,
+          password: authData.password,
+          returnSecureToken: true,
+        }
+      )
+      .then((res) => {
+        commit("setToken", res.data.idToken);
+      })
+      .catch((e) => console.log(e));
+  },
+  logoutUser({ commit }) {
+    commit('destroyToken');
+  },
+  addPost({ commit }, post) {
     return axios
       .post("https://blog-nuxt-6f33e.firebaseio.com/posts.json", post)
       .then((res) => {
@@ -44,26 +67,29 @@ export const actions = {
       })
       .catch((e) => console.log(e));
   },
-  editPost ({ commit }, post) {
+  editPost({ commit, state }, post) {
     return axios
-      .put(`https://blog-nuxt-6f33e.firebaseio.com/posts/${post.id}.json`, post)
+      .put(
+        `https://blog-nuxt-6f33e.firebaseio.com/posts/${post.id}.json?auth=${state.token}`,
+        post
+      )
       .then((res) => {
         commit("editPost", post);
       })
       .catch((e) => console.log(e));
   },
-  addComment ({commit}, comment) {
+  addComment({ commit }, comment) {
     return axios
       .post("https://blog-nuxt-6f33e.firebaseio.com/comments.json", comment)
-      .then((res) => {
-        commit("addComment", { ...comment, id: res.data.name });
-      })
       .catch((e) => console.log(e));
-  }
+  },
 };
 
 export const getters = {
   getPostsLoaded(state) {
     return state.postsLoaded;
+  },
+  checkAuthUser(state) {
+    return state.token != null;
   },
 };
